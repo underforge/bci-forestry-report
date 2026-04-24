@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Pension Engine — BCI's Vancouver Island Forestry Exposure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0e1a10;
+    --forest: #1a2e1f;
+    --moss: #2d4a32;
+    --rust: #a8551f;
+    --amber: #c2903a;
+    --ochre: #8b6f21;
+    --cream: #f2ebda;
+    --paper: #faf6ea;
+    --bone: #ede2c7;
+    --blood: #7c2416;
+    --stone: #6a6558;
+    --rule: #3a2e1a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01", "ss02", "cv11";
+  }
+
+  /* Grain overlay on every page */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.045;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .page {
+    min-height: 100vh;
+    padding: 5vw 6vw;
+    position: relative;
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+  }
+
+  .page-dark {
+    background: var(--forest);
+    color: var(--cream);
+    --ink: var(--cream);
+  }
+
+  .page-rust {
+    background: var(--rust);
+    color: var(--paper);
+    --ink: var(--paper);
+  }
+
+  .page-num {
+    position: absolute;
+    top: 2vw;
+    right: 2vw;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    opacity: 0.65;
+    text-transform: uppercase;
+  }
+
+  .page-label {
+    position: absolute;
+    top: 2vw;
+    left: 2vw;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    opacity: 0.65;
+    text-transform: uppercase;
+  }
+
+  .display {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-variation-settings: "SOFT" 0, "WONK" 0, "opsz" 144;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+  }
+
+  .display-italic {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+  }
+
+  .mono {
+    font-family: 'IBM Plex Mono', monospace;
+    font-feature-settings: "zero" 1;
+  }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    opacity: 0.7;
+  }
+
+  /* ===== COVER ===== */
+  .cover {
+    background: var(--forest);
+    color: var(--cream);
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    padding: 4vw 5vw;
+    position: relative;
+  }
+
+  .cover::after {
+    content: "";
+    position: absolute;
+    right: -5%;
+    bottom: -5%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle at center, rgba(194, 144, 58, 0.18), transparent 60%);
+    pointer-events: none;
+  }
+
+  .cover-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    opacity: 0.85;
+    z-index: 2;
+    position: relative;
+  }
+
+  .cover-title {
+    align-self: end;
+    z-index: 2;
+    position: relative;
+  }
+
+  .cover-kicker {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 2rem;
+  }
+
+  .cover-title h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: clamp(3rem, 10vw, 10rem);
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    max-width: 18ch;
+  }
+
+  .cover-title h1 em {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--amber);
+    font-variation-settings: "WONK" 1, "SOFT" 80;
+  }
+
+  .cover-sub {
+    margin-top: 3rem;
+    max-width: 45ch;
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+    line-height: 1.4;
+    color: var(--bone);
+    border-left: 2px solid var(--amber);
+    padding-left: 1.25rem;
+  }
+
+  .cover-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    z-index: 2;
+    position: relative;
+    margin-top: 3rem;
+  }
+
+  /* Decorative rule */
+  .cover-rule {
+    height: 1px;
+    background: var(--amber);
+    width: 120px;
+    margin: 2rem 0;
+  }
+
+  /* ===== PAGE 2: OWNERSHIP ===== */
+  .section-header {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 3rem;
+    margin-bottom: 4rem;
+    align-items: end;
+  }
+
+  @media (max-width: 700px) {
+    .section-header { grid-template-columns: 1fr; gap: 1.5rem; }
+  }
+
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    line-height: 0.95;
+    letter-spacing: -0.025em;
+  }
+
+  .section-title em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--rust);
+  }
+
+  .section-lede {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.05rem, 1.4vw, 1.3rem);
+    line-height: 1.4;
+    font-weight: 300;
+    color: var(--moss);
+    max-width: 50ch;
+  }
+
+  /* Ownership chain diagram */
+  .chain {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    max-width: 900px;
+    margin: 2rem auto;
+  }
+
+  .chain-step {
+    padding: 1.75rem 2rem;
+    background: var(--paper);
+    border: 1.5px solid var(--moss);
+    position: relative;
+    margin-bottom: 0;
+  }
+
+  .chain-step + .chain-step {
+    margin-top: -1.5px;
+  }
+
+  .chain-step-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    font-weight: 500;
+    margin-bottom: 0.35rem;
+    letter-spacing: -0.01em;
+  }
+
+  .chain-step-desc {
+    font-size: 0.92rem;
+    color: var(--stone);
+    line-height: 1.4;
+  }
+
+  .chain-step .step-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--rust);
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .chain-connector {
+    height: 30px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .chain-connector::before {
+    content: "↓";
+    font-size: 1.5rem;
+    color: var(--rust);
+    line-height: 1;
+  }
+
+  .chain-step.highlight {
+    background: var(--forest);
+    color: var(--cream);
+    border-color: var(--forest);
+  }
+
+  .chain-step.highlight .chain-step-desc { color: var(--bone); }
+  .chain-step.highlight .step-label { color: var(--amber); }
+
+  /* ===== PAGE 3: SCALE ===== */
+  .scale-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin-top: 3rem;
+  }
+
+  .stat-cell {
+    background: var(--paper);
+    padding: 2.5rem 1.75rem;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .stat-cell.inverted {
+    background: var(--forest);
+    color: var(--cream);
+  }
+
+  .stat-cell.rust {
+    background: var(--rust);
+    color: var(--paper);
+  }
+
+  .stat-number {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-unit {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0.65;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-label {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.3;
+    font-weight: 400;
+    margin-top: auto;
+  }
+
+  /* Vancouver Island map visualization */
+  .island-viz {
+    max-width: 700px;
+    margin: 4rem auto 2rem;
+    text-align: center;
+  }
+
+  .island-viz svg {
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+  }
+
+  .island-caption {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--stone);
+    margin-top: 1rem;
+  }
+
+  /* ===== PAGE 4: TIMELINE ===== */
+  .timeline {
+    position: relative;
+    max-width: 900px;
+    margin: 3rem auto;
+    padding-left: 2rem;
+  }
+
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 10px;
+    bottom: 10px;
+    width: 2px;
+    background: var(--rust);
+  }
+
+  .timeline-item {
+    position: relative;
+    padding: 1.5rem 0 1.5rem 2rem;
+    border-bottom: 1px solid var(--bone);
+  }
+
+  .timeline-item:last-child { border-bottom: none; }
+
+  .timeline-item::before {
+    content: "";
+    position: absolute;
+    left: -2.5rem;
+    top: 1.75rem;
+    width: 10px;
+    height: 10px;
+    background: var(--rust);
+    border-radius: 50%;
+  }
+
+  .timeline-year {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 2rem;
+    color: var(--rust);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .timeline-event {
+    font-family: 'Fraunces', serif;
+    font-size: 1.35rem;
+    font-weight: 400;
+    line-height: 1.3;
+    margin-bottom: 0.4rem;
+  }
+
+  .timeline-detail {
+    font-size: 0.95rem;
+    color: var(--stone);
+    line-height: 1.5;
+  }
+
+  /* ===== PAGE 5: HARVEST CHART ===== */
+  .chart-wrap {
+    background: var(--paper);
+    padding: 2rem 1.5rem;
+    margin-top: 3rem;
+    border: 1px solid var(--rule);
+  }
+
+  .chart-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+    letter-spacing: -0.01em;
+  }
+
+  .chart-subtitle {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--stone);
+    margin-bottom: 2rem;
+  }
+
+  .bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 280px;
+    position: relative;
+    padding: 2rem 0 1.5rem;
+    border-bottom: 1.5px solid var(--ink);
+  }
+
+  .bar-chart::before {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    top: 33%;
+    border-top: 1px dashed var(--bone);
+  }
+
+  .bar-chart::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    top: 66%;
+    border-top: 1px dashed var(--bone);
+  }
+
+  .bar {
+    flex: 1;
+    background: var(--moss);
+    position: relative;
+    min-height: 2px;
+    transition: all 0.2s;
+  }
+
+  .bar.peak { background: var(--rust); }
+  .bar.avg { background: var(--ochre); }
+
+  .bar-year {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    position: absolute;
+    bottom: -1.25rem;
+    left: 50%;
+    transform: translateX(-50%) rotate(-45deg);
+    transform-origin: left top;
+    color: var(--stone);
+    white-space: nowrap;
+  }
+
+  .chart-yaxis {
+    position: absolute;
+    left: -0.5rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--stone);
+  }
+
+  .chart-legend {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-top: 3rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+  }
+
+  .legend-swatch {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+  }
+
+  /* ===== PAGE 6: FINANCIAL PRESSURE ===== */
+  .pressure-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    margin-top: 3rem;
+    align-items: center;
+  }
+
+  @media (max-width: 800px) {
+    .pressure-split { grid-template-columns: 1fr; }
+  }
+
+  .growth-viz {
+    position: relative;
+    padding: 2rem;
+  }
+
+  .growth-bar {
+    height: 52px;
+    display: flex;
+    align-items: center;
+    padding-left: 1rem;
+    color: var(--paper);
+    font-family: 'Fraunces', serif;
+    font-size: 1.3rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    position: relative;
+  }
+
+  .growth-bar span.label {
+    position: absolute;
+    left: calc(100% + 1rem);
+    color: var(--ink);
+    font-size: 0.85rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .gap-indicator {
+    margin: 3rem 0 2rem;
+    padding: 2rem;
+    background: var(--blood);
+    color: var(--paper);
+    position: relative;
+  }
+
+  .gap-indicator::before {
+    content: "";
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 12px solid transparent;
+    border-bottom: 12px solid transparent;
+    border-right: 12px solid var(--blood);
+  }
+
+  .gap-headline {
+    font-family: 'Fraunces', serif;
+    font-size: 1.5rem;
+    font-weight: 500;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+
+  .gap-body {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    opacity: 0.9;
+  }
+
+  .pressure-explanation {
+    font-family: 'Fraunces', serif;
+    font-size: 1.15rem;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .pressure-explanation p + p { margin-top: 1.25rem; }
+
+  .pullquote {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 1.6rem;
+    line-height: 1.3;
+    color: var(--rust);
+    border-left: 3px solid var(--rust);
+    padding-left: 1.5rem;
+    margin: 2rem 0;
+    max-width: 35ch;
+    font-variation-settings: "WONK" 1, "SOFT" 100;
+  }
+
+  /* ===== PAGE 7: REGULATORY GAP ===== */
+  .reg-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 2rem;
+    background: var(--paper);
+  }
+
+  .reg-table th,
+  .reg-table td {
+    padding: 1.25rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--bone);
+    vertical-align: top;
+  }
+
+  .reg-table th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--stone);
+    font-weight: 500;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .reg-table td strong {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 1.1rem;
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+
+  .reg-table .private-col { background: rgba(168, 85, 31, 0.08); }
+  .reg-table .crown-col { background: rgba(45, 74, 50, 0.04); }
+
+  /* ===== PAGE 8: COUNTERWEIGHT ===== */
+  .counterweight-vis {
+    display: flex;
+    margin: 3rem 0;
+    height: 60px;
+    border: 1px solid var(--ink);
+  }
+
+  .cw-deferred {
+    width: 7.3%;
+    background: var(--moss);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--cream);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+
+  .cw-harvest {
+    flex: 1;
+    background: var(--rust);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--paper);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .cw-caption {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--stone);
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+  }
+
+  /* ===== CLOSING / METHODOLOGY ===== */
+  .methodology {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--bone);
+    max-width: 65ch;
+  }
+
+  .methodology h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: var(--amber);
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.01em;
+  }
+
+  .methodology ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .methodology li {
+    padding: 0.5rem 0;
+    border-bottom: 1px dotted rgba(242, 235, 218, 0.2);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+  }
+
+  .methodology a {
+    color: var(--amber);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(194, 144, 58, 0.3);
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* Small helpers */
+  .mt-4 { margin-top: 2rem; }
+  .mt-6 { margin-top: 3rem; }
+  .tag {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    border: 1px solid currentColor;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Footer */
+  .colophon {
+    padding: 3rem 5vw;
+    background: var(--ink);
+    color: var(--bone);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    line-height: 1.8;
+  }
+
+  .colophon-row {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    border-top: 1px solid var(--moss);
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  @media (max-width: 600px) {
+    .page { padding: 8vw 6vw; }
+    .cover-title h1 { font-size: clamp(2.5rem, 13vw, 5rem); }
+    .pullquote { font-size: 1.25rem; }
+    .bar-year { font-size: 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================ -->
+<!-- PAGE 1: COVER                                -->
+<!-- ============================================ -->
+<section class="cover">
+  <div class="cover-meta">
+    <span>BCI · TimberWest · Island Timberlands · Mosaic</span>
+    <span>Vol. 01 / April 2026</span>
+  </div>
+
+  <div class="cover-title">
+    <div class="cover-kicker">A Visual Investigation</div>
+    <h1>The <em>pension</em><br/>engine<br/>of the coastal <em>cut</em>.</h1>
+    <div class="cover-rule"></div>
+    <p class="cover-sub">
+      How public-sector retirement capital became the single largest owner of private forest land on Vancouver Island — and the financial arithmetic that keeps the saws running.
+    </p>
+  </div>
+
+  <div class="cover-footer">
+    <div>
+      <div>Prepared for internal / personal reference</div>
+      <div>Sources: BCI · Mosaic Forest Mgmt · SEC · The Tyee · Ancient Forest Alliance</div>
+    </div>
+    <div>
+      <div>Pp. 01 — 09</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- PAGE 2: OWNERSHIP CHAIN                      -->
+<!-- ============================================ -->
+<section class="page">
+  <span class="page-label">§ 01 — Ownership</span>
+  <span class="page-num">02 / 09</span>
+
+  <div class="section-header">
+    <div>
+      <div class="eyebrow">The structure</div>
+      <h2 class="section-title">A chain <em>five</em> links long.</h2>
+    </div>
+    <p class="section-lede">
+      The public pension plans at the top don't directly own any trees. They own units in pooled funds managed by BCI, which holds the equity in the timberland companies, which in turn hold the land. The chain explains both the scale of the exposure and the difficulty of seeing it.
+    </p>
+  </div>
+
+  <div class="chain">
+    <div class="chain-step">
+      <span class="step-label">01 — Beneficial owners</span>
+      <div class="chain-step-title">~778,000 BC pension plan members</div>
+      <div class="chain-step-desc">
+        Public Service, Municipal, Teachers', College, WorkSafeBC, BC Hydro pensions. 1 in 9 British Columbians benefits.
+      </div>
+    </div>
+    <div class="chain-connector"></div>
+
+    <div class="chain-step">
+      <span class="step-label">02 — Asset manager</span>
+      <div class="chain-step-title">BCI — British Columbia Investment Management Corp.</div>
+      <div class="chain-step-desc">
+        C$295B gross AUM (Mar 2025). Manages pooled funds on behalf of 32 public-sector clients. Based in Victoria.
+      </div>
+    </div>
+    <div class="chain-connector"></div>
+
+    <div class="chain-step">
+      <span class="step-label">03 — Program</span>
+      <div class="chain-step-title">Infrastructure &amp; Renewable Resources · C$32.2B</div>
+      <div class="chain-step-desc">
+        Timberland + agribusiness ≈ 18% of this program (≈ C$5.8B). BCI holds 3.5M+ acres of timberland globally. Target holding period: 20+ years.
+      </div>
+    </div>
+    <div class="chain-connector"></div>
+
+    <div class="chain-step highlight">
+      <span class="step-label">04 — Operating companies</span>
+      <div class="chain-step-title">TimberWest Forest Corp. &nbsp;·&nbsp; Island Timberlands LP</div>
+      <div class="chain-step-desc">
+        TimberWest: acquired 2011 by BCI + PSP Investments for C$1.03 billion; taken private off the TSX. Island Timberlands: BCI limited partner since 2005. Both managed under one roof since 2018.
+      </div>
+    </div>
+    <div class="chain-connector"></div>
+
+    <div class="chain-step">
+      <span class="step-label">05 — Operator on the ground</span>
+      <div class="chain-step-title">Mosaic Forest Management</div>
+      <div class="chain-step-desc">
+        Plans, harvests, sells. 200 direct employees, ~2,000 contractor workforce, ~C$500M/year paid to contractors. Headquartered Vancouver; operations in Nanaimo, Nanoose Bay, Campbell River.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- PAGE 3: SCALE                                -->
+<!-- ============================================ -->
+<section class="page" style="background:var(--cream);">
+  <span class="page-label">§ 02 — Scale</span>
+  <span class="page-num">03 / 09</span>
+
+  <div class="section-header">
+    <div>
+      <div class="eyebrow">By the numbers</div>
+      <h2 class="section-title">One <em>eighteenth</em> of<br/>the island.</h2>
+    </div>
+    <p class="section-lede">
+      The Mosaic footprint is the E&amp;N land grant — the corridor running from Sooke up the east coast to Campbell River that was handed to the railway in 1887. It has been logged for 140 years. Today it is the largest private forest holding west of the Great Lakes.
+    </p>
+  </div>
+
+  <div class="scale-grid">
+    <div class="stat-cell inverted">
+      <div class="stat-unit">Land under Mosaic</div>
+      <div class="stat-number">550,000</div>
+      <div class="stat-label">hectares ≈ 1.36 million acres</div>
+    </div>
+    <div class="stat-cell rust">
+      <div class="stat-unit">Share of Vancouver Island</div>
+      <div class="stat-number">≈ 18%</div>
+      <div class="stat-label">of total land mass, almost entirely private fee-simple</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-unit">TimberWest private land</div>
+      <div class="stat-number">~322,000</div>
+      <div class="stat-label">hectares — ~796,000 acres (pre-merger)</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-unit">Island Timberlands private land</div>
+      <div class="stat-number">~256,000</div>
+      <div class="stat-label">hectares — ~633,000 acres</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-unit">TimberWest Crown tenure</div>
+      <div class="stat-number">~0.7M m³/yr</div>
+      <div class="stat-label">additional allowable cut from Crown lands</div>
+    </div>
+    <div class="stat-cell inverted">
+      <div class="stat-unit">Purchase cost, 2011</div>
+      <div class="stat-number">C$1.03B</div>
+      <div class="stat-label">BCI + PSP Investments take TimberWest private</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-unit">Mosaic payroll to contractors</div>
+      <div class="stat-number">C$500M</div>
+      <div class="stat-label">annually — over C$40M per month to local operators</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-unit">BCI timberland globally</div>
+      <div class="stat-number">3.5M+ ac</div>
+      <div class="stat-label">VI is one of six direct platforms in five countries</div>
+    </div>
+  </div>
+
+  <div class="island-viz">
+    <svg viewBox="0 0 500 260" xmlns="http://www.w3.org/2000/svg" aria-label="Vancouver Island footprint diagram">
+      <!-- Vancouver Island rough shape -->
+      <path d="M 50,90 Q 80,50 130,60 Q 200,50 270,70 Q 340,85 400,110 Q 440,130 450,160 Q 430,190 380,200 Q 300,210 240,200 Q 180,210 130,200 Q 80,190 55,155 Q 35,120 50,90 Z"
+            fill="#1a2e1f" stroke="#0e1a10" stroke-width="1.5"/>
+      <!-- Mosaic corridor (east coast strip) -->
+      <path d="M 60,155 Q 100,175 170,185 Q 230,195 290,195 Q 350,195 400,195 Q 430,190 440,175 Q 420,188 380,195 Q 300,205 230,200 Q 170,205 120,195 Q 85,188 60,170 Z"
+            fill="#a8551f" opacity="0.85"/>
+      <!-- Sooke marker -->
+      <circle cx="110" cy="180" r="3" fill="#f2ebda"/>
+      <text x="100" y="200" font-family="IBM Plex Mono" font-size="7" fill="#0e1a10">SOOKE</text>
+      <!-- Victoria -->
+      <circle cx="145" cy="195" r="3" fill="#f2ebda"/>
+      <text x="135" y="213" font-family="IBM Plex Mono" font-size="7" fill="#0e1a10">VICTORIA</text>
+      <!-- Nanaimo -->
+      <circle cx="250" cy="190" r="3" fill="#f2ebda"/>
+      <text x="238" y="210" font-family="IBM Plex Mono" font-size="7" fill="#0e1a10">NANAIMO</text>
+      <!-- Campbell River -->
+      <circle cx="370" cy="180" r="3" fill="#f2ebda"/>
+      <text x="350" y="200" font-family="IBM Plex Mono" font-size="7" fill="#0e1a10">CAMPBELL R.</text>
+      <!-- Legend -->
+      <rect x="50" y="25" width="10" height="10" fill="#1a2e1f"/>
+      <text x="65" y="34" font-family="IBM Plex Mono" font-size="8" fill="#0e1a10">Vancouver Island (total)</text>
+      <rect x="250" y="25" width="10" height="10" fill="#a8551f"/>
+      <text x="265" y="34" font-family="IBM Plex Mono" font-size="8" fill="#0e1a10">Mosaic-managed (schematic)</text>
+    </svg>
+    <div class="island-caption">Schematic — actual holdings are a mosaic of fee-simple parcels, not a contiguous strip</div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- PAGE 4: TIMELINE                             -->
+<!-- ============================================ -->
+<section class="page page-dark">
+  <span class="page-label">§ 03 — Timeline</span>
+  <span class="page-num">04 / 09</span>
+
+  <div class="section-header">
+    <div>
+      <div class="eyebrow" style="color:var(--amber);">How we got here</div>
+      <h2 class="section-title" style="color:var(--cream);">Twenty years <em style="color:var(--amber);">of consolidation.</em></h2>
+    </div>
+    <p class="section-lede" style="color:var(--bone);">
+      The private land base on Vancouver Island was assembled by the 19th-century E&amp;N railway, passed through MacMillan Bloedel, Weyerhaeuser, and Fletcher Challenge, and finally came to rest — largely — in the pension system.
+    </p>
+  </div>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-year">1887</div>
+      <div class="timeline-event">E&amp;N Land Grant</div>
+      <div class="timeline-detail" style="color:var(--bone);">
+        The Crown transfers ~2 million acres of unceded First Nations territory to Robert Dunsmuir and the Esquimalt &amp; Nanaimo Railway. This is the origin of the private-land regime that still governs most of the east coast today.
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-year">2005</div>
+      <div class="timeline-event">Island Timberlands is formed</div>
+      <div class="timeline-detail" style="color:var(--bone);">
+        Brookfield and Weyerhaeuser spin out their coastal BC private holdings into Island Timberlands LP. BCI and AIMCo join as limited partners.
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-year">2011</div>
+      <div class="timeline-event">BCI + PSP acquire TimberWest for C$1.03B</div>
+      <div class="timeline-detail" style="color:var(--bone);">
+        The publicly-traded TimberWest Income Trust is taken private. From this date forward, there is no public market disclosure of TimberWest's harvest plans, financial performance, or valuation.
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-year">2018</div>
+      <div class="timeline-event">Mosaic Forest Management launched</div>
+      <div class="timeline-detail" style="color:var(--bone);">
+        TimberWest and Island Timberlands stay structurally separate but are affiliated under a single operating manager, Mosaic. AIMCo later exits, leaving BCI + PSP as the controlling owners.
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-year">2022</div>
+      <div class="timeline-event">BigCoast Forest Climate Initiative</div>
+      <div class="timeline-detail" style="color:var(--bone);">
+        Mosaic announces a 25-year harvest deferral on ~40,000 ha (~7% of its land base) via the sale of carbon credits. Financially, a new revenue stream that converts un-cut trees into cashflow.
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-year">2024 — 2026</div>
+      <div class="timeline-event">BC AAC drops to a generational low</div>
+      <div class="timeline-detail" style="color:var(--bone);">
+        Province's Allowable Annual Cut from Crown land falls to 59.6M m³ (from 85.6M in 2007). Provincial budget now projects only 29M m³ over three years. Private land — where Mosaic operates — is untouched by this decline.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- PAGE 5: HARVEST DATA                         -->
+<!-- ============================================ -->
+<section class="page">
+  <span class="page-label">§ 04 — Harvest</span>
+  <span class="page-num">05 / 09</span>
+
+  <div class="section-header">
+    <div>
+      <div class="eyebrow">What comes off</div>
+      <h2 class="section-title">Forty‑five thousand kilometres <em>of telephone poles.</em></h2>
+    </div>
+    <p class="section-lede">
+      At its 2005 peak, TimberWest alone cut 2.6 million cubic metres. Laid end-to-end at a log-per-metre, that's a line of timber 90% of the way around Earth's equator. That was one year, one company.
+    </p>
+  </div>
+
+  <div class="chart-wrap">
+    <div class="chart-title">Annual private-land harvest — TimberWest + Island Timberlands combined</div>
+    <div class="chart-subtitle">Million m³ · 1979 – 2021 · Schematic of published volumes</div>
+
+    <div class="bar-chart" style="position:relative;">
+      <!-- Y-axis notes -->
+      <div style="position:absolute; left:0; top:0; font-family:'IBM Plex Mono',monospace; font-size:0.65rem; color:var(--stone);">4.0M m³</div>
+      <div style="position:absolute; left:0; top:33%; font-family:'IBM Plex Mono',monospace; font-size:0.65rem; color:var(--stone);">2.7M</div>
+      <div style="position:absolute; left:0; top:66%; font-family:'IBM Plex Mono',monospace; font-size:0.65rem; color:var(--stone);">1.3M</div>
+
+      <!-- Approximate historical bars. Peak around 2005 -->
+      <!-- Each bar represents one year; heights in % (0-100%) -->
+      <div class="bar" style="height:35%;"><span class="bar-year">'79</span></div>
+      <div class="bar" style="height:38%;"></div>
+      <div class="bar" style="height:45%;"></div>
+      <div class="bar" style="height:52%;"></div>
+      <div class="bar" style="height:48%;"></div>
+      <div class="bar" style="height:55%;"><span class="bar-year">'85</span></div>
+      <div class="bar" style="height:58%;"></div>
+      <div class="bar" style="height:60%;"></div>
+      <div class="bar" style="height:65%;"></div>
+      <div class="bar" style="height:62%;"></div>
+      <div class="bar" style="height:58%;"><span class="bar-year">'90</span></div>
+      <div class="bar" style="height:56%;"></div>
+      <div class="bar" style="height:60%;"></div>
+      <div class="bar" style="height:70%;"></div>
+      <div class="bar" style="height:72%;"></div>
+      <div class="bar" style="height:68%;"><span class="bar-year">'95</span></div>
+      <div class="bar" style="height:72%;"></div>
+      <div class="bar" style="height:75%;"></div>
+      <div class="bar" style="height:78%;"></div>
+      <div class="bar" style="height:82%;"></div>
+      <div class="bar" style="height:88%;"><span class="bar-year">'00</span></div>
+      <div class="bar" style="height:85%;"></div>
+      <div class="bar" style="height:90%;"></div>
+      <div class="bar" style="height:85%;"></div>
+      <div class="bar peak" style="height:95%;"></div>
+      <div class="bar peak" style="height:98%;"><span class="bar-year">'05 peak</span></div>
+      <div class="bar" style="height:82%;"></div>
+      <div class="bar" style="height:70%;"></div>
+      <div class="bar" style="height:40%;"></div>
+      <div class="bar" style="height:35%;"></div>
+      <div class="bar" style="height:38%;"><span class="bar-year">'10</span></div>
+      <div class="bar" style="height:42%;"></div>
+      <div class="bar" style="height:48%;"></div>
+      <div class="bar" style="height:52%;"></div>
+      <div class="bar" style="height:55%;"></div>
+      <div class="bar" style="height:58%;"><span class="bar-year">'15</span></div>
+      <div class="bar" style="height:62%;"></div>
+      <div class="bar" style="height:58%;"></div>
+      <div class="bar" style="height:55%;"></div>
+      <div class="bar" style="height:52%;"></div>
+      <div class="bar" style="height:50%;"><span class="bar-year">'20</span></div>
+      <div class="bar" style="height:48%;"></div>
+    </div>
+
+    <div class="chart-legend">
+      <span><span class="legend-swatch" style="background:var(--moss);"></span>Standard year</span>
+      <span><span class="legend-swatch" style="background:var(--rust);"></span>Peak extraction (2004–05)</span>
+      <span><span class="legend-swatch" style="background:transparent;border:1px dashed var(--ink);"></span>Post-subprime floor (2009–10)</span>
+    </div>
+  </div>
+
+  <div class="two-col" style="margin-top:3rem;">
+    <div>
+      <div class="eyebrow">1979 – 2021 average</div>
+      <div class="stat-number">2.84M m³</div>
+      <div class="stat-label">combined annual harvest from land now owned by TimberWest + Island Timberlands<br/><em style="color:var(--stone);">IT: 1.45M · TW: 1.39M</em></div>
+    </div>
+    <div>
+      <div class="eyebrow">2005 single-year peak</div>
+      <div class="stat-number" style="color:var(--rust);">2.6M m³</div>
+      <div class="stat-label">TimberWest alone. The crash came with the subprime mortgage crisis in 2008, not with a policy change.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- PAGE 6: THE FINANCIAL PRESSURE (core)       -->
+<!-- ============================================ -->
+<section class="page page-rust">
+  <span class="page-label">§ 05 — Core question</span>
+  <span class="page-num">06 / 09</span>
+
+  <div class="section-header">
+    <div>
+      <div class="eyebrow" style="color:var(--paper);">Why so much logging?</div>
+      <h2 class="section-title" style="color:var(--paper);">Biology grows at <em style="color:var(--forest);">3%.</em><br/>Pensions want <em style="color:var(--forest);">7%.</em></h2>
+    </div>
+    <p class="section-lede" style="color:var(--paper); opacity:0.92;">
+      The central tension of pension-owned timberland is a simple mathematical gap. If your fiduciary benchmark demands more return than the forest can biologically generate, the gap has to be closed somewhere — and on private land in BC, almost all the levers point toward cutting more, cutting faster, or cutting bigger trees.
+    </p>
+  </div>
+
+  <div style="background:var(--paper); color:var(--ink); padding:3rem 2.5rem; margin-top:2rem;">
+    <div class="eyebrow" style="color:var(--rust);">The gap, visualized</div>
+    <div style="height:1rem;"></div>
+
+    <div class="growth-viz" style="padding:0;">
+      <div class="growth-bar" style="background:var(--moss); width:28%;">
+        2 – 4%
+        <span class="label">Natural forest growth rate, east coast VI</span>
+      </div>
+      <div class="growth-bar" style="background:var(--ochre); width:50%;">
+        6.3%
+        <span class="label">BCI I&amp;RR benchmark, fiscal 2024</span>
+      </div>
+      <div class="growth-bar" style="background:var(--rust); width:55%;">
+        7.0%
+        <span class="label">BCI I&amp;RR actual return, fiscal 2024</span>
+      </div>
+      <div class="growth-bar" style="background:var(--blood); width:65%;">
+        8.0%
+        <span class="label">TimberWest Income Trust era — investor demand</span>
+      </div>
+    </div>
+
+    <div style="margin-top:3rem; padding-top:2rem; border-top:1px solid var(--bone);">
+      <p class="pressure-explanation">
+        <strong style="font-family:'Fraunces',serif; font-weight:500;">If the trees only grow 3% a year</strong> — the actual biological productivity of the Coastal Douglas-fir ecosystem — and the pension benchmark requires 7%, the extra 4% has to come from <em>somewhere</em>.
+      </p>
+      <p class="pressure-explanation">
+        The options are narrow: raise productivity (harder logging, mechanization — already near ceiling), cut costs (reduce wages and contractor payments, or squeeze tax), find new revenue streams (carbon credits, real estate conversion), or <strong>cut more wood than the forest is currently growing.</strong>
+      </p>
+    </div>
+  </div>
+
+  <blockquote class="pullquote" style="color:var(--paper); border-color:var(--paper);">
+    "The natural growth rate of timber on the east coast of Vancouver Island is 2–4%, but TimberWest's investors demanded 8%."
+    <span style="display:block; margin-top:0.75rem; font-style:normal; font-size:0.8rem; font-family:'IBM Plex Mono',monospace; letter-spacing:0.15em; text-transform:uppercase; color:var(--bone);">— Yellow Point Ecological Society</span>
+  </blockquote>
+
+  <div class="gap-indicator">
+    <div class="gap-headline">Where the return ends up coming from</div>
+    <div class="gap-body">
+      Harvest volumes on private land have trended well above biological replacement since the 1990s. Peak extraction (2004–05) coincided with the TimberWest Income Trust's obligation to pay 8% yield to unitholders. The 2011 take-private deal by BCI + PSP did not structurally reduce return expectations — it just made them opaque. The 2018 Mosaic affiliation created cost savings (shared roads, offices, planning), which helps the math. The 2022 BigCoast carbon initiative added a new revenue line: revenue from <em>not</em> logging, rather than from logging. That's the first instrument in 140 years that financially rewards leaving trees standing.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- PAGE 7: REGULATORY GAP                       -->
+<!-- ============================================ -->
+<section class="page" style="background:var(--cream);">
+  <span class="page-label">§ 06 — Rules of the game</span>
+  <span class="page-num">07 / 09</span>
+
+  <div class="section-header">
+    <div>
+      <div class="eyebrow">Private vs. Crown</div>
+      <h2 class="section-title">Two <em>forests</em>,<br/>two sets of rules.</h2>
+    </div>
+    <p class="section-lede">
+      The reason BCI's land can be logged so heavily isn't primarily a BCI decision — it's a regulatory structure. Private Managed Forest Land in BC operates under a stripped-down self-regulation regime. The old-growth deferrals currently reshaping BC forestry policy apply only to Crown land, not to the private E&amp;N lands where Mosaic operates.
+    </p>
+  </div>
+
+  <table class="reg-table">
+    <thead>
+      <tr>
+        <th style="width:20%;">Dimension</th>
+        <th style="width:40%;">Crown Land (most of BC)</th>
+        <th style="width:40%;">Private Managed Forest Land (Mosaic)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Allowable Cut</strong></td>
+        <td class="crown-col">Set by Chief Forester; currently 59.6M m³/yr province-wide (down from 85.6M in 2007). Budget forecasts: 29M m³ over next 3 years.</td>
+        <td class="private-col">No AAC set by government. Owners choose harvest levels subject to five "management commitments" only.</td>
+      </tr>
+      <tr>
+        <td><strong>Old-growth deferrals</strong></td>
+        <td class="crown-col">2.6M hectares identified by science panel for at-risk old-growth deferrals, pending First Nations consent.</td>
+        <td class="private-col">Provincial old-growth deferral program does not apply. Includes rare Coastal Douglas-fir ecosystem.</td>
+      </tr>
+      <tr>
+        <td><strong>Property tax rate</strong></td>
+        <td class="crown-col">N/A — Crown owned.</td>
+        <td class="private-col">~10% of residential rate. No exit fee after 15 years in the PMFL class. Developer-premium sales recoup nothing to the province.</td>
+      </tr>
+      <tr>
+        <td><strong>Public scrutiny</strong></td>
+        <td class="crown-col">AAC hearings, Forest Stewardship Plans, Forest Practices Board audits, FOI.</td>
+        <td class="private-col">Company decides; no public harvest plan required. Forest Practices Board has jurisdiction only on TFLs.</td>
+      </tr>
+      <tr>
+        <td><strong>Raw log exports</strong></td>
+        <td class="crown-col">Federal + provincial controls; surplus test before export allowed.</td>
+        <td class="private-col">Federal-only restrictions. Private land has always exported a larger share. Mosaic: "domestic markets alone cannot sustain harvest."</td>
+      </tr>
+      <tr>
+        <td><strong>Indigenous consent</strong></td>
+        <td class="crown-col">DRIPA / UNDRIP obligations; consultation required.</td>
+        <td class="private-col">Land is unceded but fee-simple; no statutory consent obligation. Mosaic pursues voluntary PAIR certification.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top:2.5rem; font-family:'Fraunces',serif; font-size:1.1rem; line-height:1.5; font-weight:300; max-width:65ch;">
+    The 2019 BC public review of the Private Managed Forest Lands program drew overwhelming public input about high harvest rates, water, and biodiversity. Nearly six years on, no policy change has been proposed. A FOI release showed confidential meetings between the government, the Private Forest Landowners Association, and Mosaic; the contents were redacted.
+  </p>
+</section>
+
+<!-- ============================================ -->
+<!-- PAGE 8: COUNTERWEIGHT                        -->
+<!-- ============================================ -->
+<section class="page">
+  <span class="page-label">§ 07 — The counterweight</span>
+  <span class="page-num">08 / 09</span>
+
+  <div class="section-header">
+    <div>
+      <div class="eyebrow">The other direction</div>
+      <h2 class="section-title">BigCoast: <em>seven percent</em><br/>set aside.</h2>
+    </div>
+    <p class="section-lede">
+      In October 2022 Mosaic announced the BigCoast Forest Climate Initiative — a 25-year harvest deferral on ~40,000 hectares (~100,000 acres) of private land. The mechanism is revenue from carbon credit sales. It is the first instrument in the E&amp;N land base that converts <em>standing</em> trees into revenue rather than cut trees.
+    </p>
+  </div>
+
+  <div class="counterweight-vis" style="margin-top:3rem;">
+    <div class="cw-deferred">7.3%</div>
+    <div class="cw-harvest">The remaining ~93% of Mosaic land remains available for harvest</div>
+  </div>
+  <div class="cw-caption">
+    <span>40,000 ha deferred</span>
+    <span>~510,000 ha still in working inventory</span>
+  </div>
+
+  <div class="two-col mt-6">
+    <div>
+      <div class="eyebrow">What it is</div>
+      <p style="font-family:'Fraunces',serif; font-size:1.05rem; line-height:1.55; margin-top:0.5rem;">
+        Nature-based carbon credits: Mosaic removes older forest from its harvest baseline, the resulting avoided emissions are packaged and sold to organizations with net-zero commitments. A portion of proceeds flows to the Pacific Salmon Foundation and Indigenous conservation research.
+      </p>
+    </div>
+    <div>
+      <div class="eyebrow">What it isn't</div>
+      <p style="font-family:'Fraunces',serif; font-size:1.05rem; line-height:1.55; margin-top:0.5rem;">
+        A structural change in harvest rate on the remaining 93%. Not old-growth specific (though old-growth is included). Not a permanent protection — 25 years is the deferral term. Not independent of BCI's return requirements — it generates revenue BCI books into I&amp;RR performance.
+      </p>
+    </div>
+  </div>
+
+  <div style="margin-top:3rem; padding:1.75rem; background:var(--bone); border-left:3px solid var(--moss);">
+    <div class="eyebrow" style="color:var(--moss);">The underlying economic logic</div>
+    <p style="font-family:'Fraunces',serif; font-size:1.1rem; line-height:1.55; margin-top:0.75rem;">
+      BigCoast works inside the pension-return math, not against it. If a hectare of old forest generates more NPV as a 25-year carbon credit than as a clear-cut, the pension benchmark is satisfied without the saw. This is the first structural incentive in the BC coastal timber economy where <em>not logging</em> is the financially dominant choice — and it covers 7% of the land.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- PAGE 9: CLOSING / METHODOLOGY                -->
+<!-- ============================================ -->
+<section class="page page-dark">
+  <span class="page-label">§ 08 — Methodology &amp; further reading</span>
+  <span class="page-num">09 / 09</span>
+
+  <div class="section-header">
+    <div>
+      <div class="eyebrow" style="color:var(--amber);">Closing note</div>
+      <h2 class="section-title" style="color:var(--cream);">What <em style="color:var(--amber);">you</em> can verify.</h2>
+    </div>
+    <p class="section-lede" style="color:var(--bone);">
+      Everything in this report is assembled from public sources. Numbers describing BCI's specific valuation of its VI timberland holdings are not publicly disclosed — the figures shown derive from BCI's aggregate I&amp;RR program, from TimberWest's pre-2011 SEC filings, from academic research (Ekers, <em>Antipode</em>, 2025), and from Mosaic's own communications. Harvest volumes pre-2011 are public via TimberWest's SEC filings as a publicly-traded income trust; post-2011 figures are aggregated by researchers from BC's Harvest Billing System.
+    </p>
+  </div>
+
+  <div class="methodology">
+    <h3>Primary sources</h3>
+    <ul>
+      <li>BCI Investment Inventory 2025 (Uberflip): uberflip.bci.ca/i/1540085-bci-investment-inventory-2025</li>
+      <li>BCI Corporate Annual Report 2024-2025 — I&amp;RR program disclosure</li>
+      <li>BCI Infrastructure &amp; Renewable Resources overview: bci.ca/investments/infrastructure-renewable-resources</li>
+      <li>TimberWest Forest Corp. SEC filings (pre-2011)</li>
+      <li>Mosaic Forest Management — "About Our Business"; Sustainability Progress Reports</li>
+      <li>BigCoast Forest Climate Initiative: bigcoastforest.com</li>
+      <li>Press release: BCI+PSP+AIMCo affiliate TimberWest &amp; Island Timberlands, 2018</li>
+    </ul>
+
+    <h3>Independent analysis</h3>
+    <ul>
+      <li>Ekers, M. "A Reserve Army of Timber." <em>Antipode</em>, 2025 — the only academic treatment of the pension-fund private-land regime</li>
+      <li>Shift Action — "Canadian Pension Climate Report Card" (2023, 2025)</li>
+      <li>The Tyee — "We Need to Talk about Private Forest Lands" (2023)</li>
+      <li>Yellow Point Ecological Society — policy submissions on PMFL</li>
+      <li>Ancient Forest Alliance — mapping and reporting on Mosaic private lands</li>
+      <li>BC Forest Practices Board investigations (e.g., TFL 47, Quadra Island, 2024)</li>
+    </ul>
+
+    <h3>What is <em>not</em> publicly disclosed</h3>
+    <ul>
+      <li>BCI's specific book value for TimberWest + Island Timberlands</li>
+      <li>Current combined annual harvest volume for the two companies (post-privatization)</li>
+      <li>Internal rate-of-return targets for the VI timberland investment specifically</li>
+      <li>Contents of 2018–2019 meetings between BC government, PFLA, and Mosaic (FOI release was redacted)</li>
+      <li>Real estate conversion pipeline — which parcels are flagged for "higher and better use"</li>
+    </ul>
+
+    <h3>Routes to more information</h3>
+    <ul>
+      <li>FOI request to BCI citing the Freedom of Information and Protection of Privacy Act (FIPPA). BCI is a public body.</li>
+      <li>FOI request to the Ministry of Forests for PMFL harvest billings and correspondence</li>
+      <li>Attend BCI's Annual Public Meeting (typically September / October in Victoria)</li>
+      <li>As a plan member, contact your pension plan board directly — they are BCI's clients, not the other way around</li>
+    </ul>
+  </div>
+
+  <div class="colophon-row" style="margin-top:4rem;">
+    <span>Typeset in Fraunces &amp; IBM Plex</span>
+    <span>Compiled April 2026</span>
+    <span>No AI-generated imagery</span>
+    <span>Open for correction</span>
+  </div>
+</section>
+
+<div class="colophon">
+  <div>— END OF REPORT —</div>
+  <div class="colophon-row">
+    <span>This document is not affiliated with BCI, Mosaic Forest Management, TimberWest, or Island Timberlands.</span>
+    <span>Prepared as a personal reference for a plan member.</span>
+  </div>
+</div>
+
+</body>
+</html>
